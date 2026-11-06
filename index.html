@@ -3,519 +3,912 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ระบบลงทะเบียนและประเมินความเสี่ยงสุขภาพเบื้องต้น</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/@mui/material@5.15.0/umd/material-ui.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@mui/icons-material@5.15.0/umd/material-ui-icons.production.min.js" crossorigin></script>
+  <title>ระบบประเมินความเสี่ยงสุขภาพเบื้องต้น</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1976d2;
+      --primary-dark: #1565c0;
+      --secondary: #7b1fa2;
+      --success: #2e7d32;
+      --warning: #e65100;
+      --error: #c62828;
+      --info: #0288d1;
+      --bg: #f0f4ff;
+      --surface: #ffffff;
+      --text-primary: #212121;
+      --text-secondary: #757575;
+      --radius: 14px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.10);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
+    }
+    html { font-size: 16px; }
     body {
       font-family: 'Sarabun', sans-serif;
       background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 50%, #e8f5e9 100%);
       min-height: 100vh;
+      color: var(--text-primary);
     }
-    #root { min-height: 100vh; }
-    .MuiTypography-root, .MuiButton-root,
-    .MuiInputBase-root, .MuiFormLabel-root,
-    .MuiMenuItem-root, .MuiAlert-root,
-    .MuiChip-root, .MuiDialogTitle-root,
-    .MuiDialogContent-root {
-      font-family: 'Sarabun', sans-serif !important;
+
+    /* ── AppBar ── */
+    .appbar {
+      background: linear-gradient(270deg,#1565c0,#7b1fa2,#00838f,#1565c0);
+      background-size: 400% 400%;
+      animation: gradientShift 8s ease infinite;
+      color: #fff;
+      padding: 14px 24px 0;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+    @keyframes gradientShift {
+      0%,100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
+    }
+    .appbar-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .appbar-title h1 { font-size: 1.15rem; font-weight: 800; line-height: 1.2; }
+    .appbar-title p  { font-size: 0.75rem; opacity: 0.85; }
+    .appbar-icon { font-size: 36px !important; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 0; }
+    .tab-btn {
+      background: none; border: none; color: rgba(255,255,255,0.75);
+      font-family: 'Sarabun',sans-serif; font-size: 0.95rem; font-weight: 600;
+      padding: 10px 20px; cursor: pointer; border-bottom: 3px solid transparent;
+      transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .tab-btn:hover { color: #fff; }
+    .tab-btn.active { color: #fff; border-bottom-color: #fff; }
+
+    /* ── Container ── */
+    .container { max-width: 860px; margin: 0 auto; padding: 28px 16px 48px; }
+
+    /* ── Paper ── */
+    .paper {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 24px;
+      animation: fadeInUp 0.4s ease forwards;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Section Header ── */
+    .section-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 8px;
+    }
+    .section-icon-box {
+      border-radius: 10px; padding: 7px; display: flex;
+      align-items: center; justify-content: center;
+    }
+    .section-title { font-size: 1.1rem; font-weight: 700; }
+    .divider { border: none; border-top: 1px solid #e0e0e0; margin: 14px 0 20px; }
+
+    /* ── Grid ── */
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .grid-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 600px) {
+      .grid-2, .grid-3, .grid-row-2 { grid-template-columns: 1fr; }
+    }
+
+    /* ── TextField ── */
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label {
+      font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);
+    }
+    .field label .req { color: var(--error); }
+    .field input, .field select {
+      font-family: 'Sarabun', sans-serif;
+      font-size: 0.95rem; padding: 10px 12px;
+      border: 1.5px solid #c8c8c8; border-radius: 8px;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+      background: #fff; color: var(--text-primary); width: 100%;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(25,118,210,0.12);
+    }
+    .field.error input, .field.error select { border-color: var(--error); }
+    .field.error input:focus { box-shadow: 0 0 0 3px rgba(198,40,40,0.12); }
+    .field-hint { font-size: 0.75rem; color: var(--text-secondary); min-height: 18px; }
+    .field-hint.err { color: var(--error); font-weight: 600; }
+    .field-hint.warn { color: var(--warning); font-weight: 600; }
+
+    /* ── RadioGroup ── */
+    .radio-group-label { font-weight: 700; font-size: 0.95rem; margin-bottom: 10px; }
+    .radio-option {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 14px; border-radius: 10px; margin-bottom: 6px;
+      cursor: pointer; transition: background 0.2s;
+      border: 1.5px solid transparent;
+    }
+    .radio-option input[type="radio"] { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
+    .radio-option.never-opt:has(input:checked)  { background: #e8f5e9; border-color: #a5d6a7; }
+    .radio-option.former-opt:has(input:checked) { background: #fff3e0; border-color: #ffcc80; }
+    .radio-option.curr-opt:has(input:checked)   { background: #ffebee; border-color: #ef9a9a; }
+    .radio-option label { cursor: pointer; font-size: 0.95rem; }
+
+    /* ── Select / MenuItem ── */
+    .field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23757575'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+    /* ── Chips ── */
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 12px; border-radius: 999px; font-size: 0.8rem;
+      font-weight: 600; border: 1.5px solid; white-space: nowrap;
+    }
+    .chip-success { color: var(--success); border-color: #a5d6a7; background: #f1f8e9; }
+    .chip-warning { color: var(--warning); border-color: #ffcc80; background: #fff8e1; }
+    .chip-error   { color: var(--error);   border-color: #ef9a9a; background: #fff3f3; }
+    .chip-info    { color: var(--info);    border-color: #81d4fa; background: #e1f5fe; }
+    .chip-primary { color: #fff; background: var(--primary); border-color: var(--primary); }
+    .chip-filled-success { color:#fff; background:var(--success); border-color:var(--success); font-size:0.95rem; padding: 6px 16px; }
+    .chip-filled-warning { color:#fff; background:var(--warning); border-color:var(--warning); font-size:0.95rem; padding: 6px 16px; }
+    .chip-filled-error   { color:#fff; background:var(--error);   border-color:var(--error);   font-size:0.95rem; padding: 6px 16px; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'Sarabun',sans-serif; font-size: 1rem; font-weight: 700;
+      padding: 11px 28px; border-radius: 10px; border: none;
+      cursor: pointer; transition: all 0.2s; text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg,#1565c0,#7b1fa2);
+      color: #fff; box-shadow: 0 4px 15px rgba(21,101,192,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(21,101,192,0.45); }
+    .btn-outline { background: #fff; color: var(--text-secondary); border: 1.5px solid #c8c8c8; }
+    .btn-outline:hover { background: #f5f5f5; }
+    .btn-sm { padding: 6px 14px; font-size: 0.85rem; border-radius: 8px; }
+    .btn-danger { background: none; color: var(--error); border: 1.5px solid #ef9a9a; }
+    .btn-danger:hover { background: #ffebee; }
+    .btn-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── Alert ── */
+    .alert {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 14px 18px; border-radius: 12px; margin-bottom: 20px;
+      border-left: 5px solid;
+    }
+    .alert-error   { background: #fff3f3; border-color: var(--error); color: var(--error); }
+    .alert-info    { background: #e3f2fd; border-color: var(--info);  color: #01579b; }
+    .alert-success { background: #e8f5e9; border-color: var(--success); color: var(--success); }
+    .alert-title   { font-weight: 700; margin-bottom: 2px; }
+    .alert-close   { margin-left: auto; cursor: pointer; opacity: 0.6; background:none; border:none; font-size: 20px; color:inherit; }
+    .alert.hidden  { display: none; }
+
+    /* ── BMI Preview ── */
+    .bmi-preview {
+      margin-top: 20px; padding: 16px; border-radius: 12px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .bmi-preview-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .bmi-value { font-size: 1.3rem; font-weight: 800; }
+
+    /* BMI Gauge */
+    .gauge-wrap { width: 100%; }
+    .gauge-labels { display: flex; margin-bottom: 4px; }
+    .gauge-labels span { flex: 1; text-align: center; font-size: 0.65rem; color: var(--text-secondary); }
+    .gauge-track {
+      height: 14px; border-radius: 999px;
+      background: linear-gradient(90deg,#29b6f6 0 23%,#66bb6a 23% 46%,#ffa726 46% 69%,#ef5350 69% 100%);
+      position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .gauge-needle {
+      position: absolute; top: -5px; width: 6px; height: 24px;
+      background: #212121; border-radius: 3px; transform: translateX(-50%);
+      transition: left 0.8s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .gauge-nums { display: flex; justify-content: space-between; margin-top: 4px; }
+    .gauge-nums span { font-size: 0.6rem; color: var(--text-secondary); }
+
+    /* Chip row */
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+
+    /* ── Stack ── */
+    .stack-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .stack-v { display: flex; flex-direction: column; gap: 8px; }
+
+    /* ── Dialog (Modal) ── */
+    .dialog-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; padding: 16px;
+      opacity: 0; transition: opacity 0.25s;
+      pointer-events: none;
+    }
+    .dialog-overlay.open { opacity: 1; pointer-events: all; }
+    .dialog {
+      background: #fff; border-radius: 20px;
+      max-width: 560px; width: 100%; max-height: 90vh;
+      overflow-y: auto; box-shadow: var(--shadow-lg);
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .dialog-overlay.open .dialog { transform: scale(1) translateY(0); }
+    .dialog-header {
+      padding: 22px 24px; color: #fff;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .dialog-header-text h2 { font-size: 1.1rem; font-weight: 800; }
+    .dialog-header-text p  { font-size: 0.75rem; opacity: 0.9; }
+    .dialog-close { margin-left: auto; background: none; border: none; color: rgba(255,255,255,0.8); cursor: pointer; font-size: 24px; display: flex; }
+    .dialog-body { padding: 24px; }
+    .dialog-actions { padding: 16px 24px; display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid #eee; flex-wrap: wrap; }
+
+    /* ── Info Card ── */
+    .info-card {
+      border: 1.5px solid #e0e0e0; border-radius: 12px; padding: 16px; margin-bottom: 16px;
+    }
+    .info-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 700; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .info-cell .label { font-size: 0.75rem; color: var(--text-secondary); }
+    .info-cell .val   { font-weight: 600; font-size: 0.95rem; }
+
+    /* ── Risk Box ── */
+    .risk-box { border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 2px solid; }
+    .risk-box-row { display: flex; align-items: center; gap: 14px; }
+
+    /* ── Recommendation ── */
+    .rec-item {
+      padding: 10px 14px; border-radius: 10px; background: #f8f9fa;
+      border-left: 4px solid; margin-bottom: 6px; font-size: 0.93rem;
+    }
+
+    /* ── History Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    thead th { background: #f5f5f5; font-weight: 700; padding: 10px 12px; text-align: left; }
+    tbody td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
+    tbody tr:hover { background: rgba(25,118,210,0.05); }
+    .table-empty { text-align: center; padding: 48px 0; color: var(--text-secondary); }
+    .table-empty .material-icons { font-size: 52px; display: block; margin-bottom: 8px; }
+    .btn-icon { background: none; border: none; cursor: pointer; color: var(--primary); padding: 4px; border-radius: 50%; display: inline-flex; }
+    .btn-icon:hover { background: rgba(25,118,210,0.1); }
+
+    /* History badge */
+    .badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #f57c00; color: #fff;
+      border-radius: 999px; font-size: 0.7rem; font-weight: 700;
+      min-width: 18px; height: 18px; padding: 0 4px;
+      position: absolute; top: -6px; right: -6px;
+    }
+    .badge-wrap { position: relative; display: inline-flex; }
+
+    /* print */
+    @media print {
+      .appbar, .no-print { display: none !important; }
+      .dialog-overlay { position: static; background: none; padding: 0; }
+      .dialog { box-shadow: none; max-height: none; }
+      .dialog-actions { display: none; }
+      body { background: white !important; }
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container { padding: 16px 10px 40px; }
+      .paper { padding: 16px; }
+      .dialog-body { padding: 16px; }
+      .dialog-header { padding: 16px; }
     }
   </style>
 </head>
 <body>
-  <div id="root"></div>
 
-  <script type="text/babel">
-    const {
-      Container, Paper, Grid, Stack, Box,
-      TextField, RadioGroup, Radio, Select, MenuItem,
-      FormControl, FormControlLabel, FormLabel,
-      Button, Alert, AlertTitle,
-      Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
-      Chip, Typography, Divider, AppBar, Toolbar,
-      LinearProgress, Tooltip, IconButton,
-      createTheme, ThemeProvider, CssBaseline,
-    } = MaterialUI;
+<!-- ── AppBar ── -->
+<div class="appbar">
+  <div class="appbar-top">
+    <span class="material-icons appbar-icon">local_hospital</span>
+    <div class="appbar-title">
+      <h1>ระบบลงทะเบียนและประเมินความเสี่ยงสุขภาพเบื้องต้น</h1>
+      <p>Patient Health Risk Assessment and Registration System</p>
+    </div>
+    <div class="badge-wrap no-print" style="margin-left:auto">
+      <button class="btn-icon" id="historyTabBtn" onclick="switchTab(1)" style="color:#fff; padding:6px;" title="ประวัติการประเมิน">
+        <span class="material-icons" style="font-size:28px">history</span>
+      </button>
+      <span class="badge" id="histBadge">0</span>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" id="tab0btn" onclick="switchTab(0)">
+      <span class="material-icons" style="font-size:18px">assignment</span> ลงทะเบียน / ประเมิน
+    </button>
+    <button class="tab-btn" id="tab1btn" onclick="switchTab(1)">
+      <span class="material-icons" style="font-size:18px">history</span> <span id="tabHistLabel">ประวัติ (0 รายการ)</span>
+    </button>
+  </div>
+</div>
 
-    const Icons = MaterialUIIcons;
+<!-- ── Container ── -->
+<div class="container">
 
-    // ─── Theme ──────────────────────────────────────────────────────────────────
-    const theme = createTheme({
-      palette: {
-        primary:   { main: '#1976d2' },
-        secondary: { main: '#7b1fa2' },
-        success:   { main: '#2e7d32' },
-        warning:   { main: '#f57c00' },
-        error:     { main: '#c62828' },
-      },
-      typography: { fontFamily: "'Sarabun', sans-serif" },
-      components: {
-        MuiPaper:  { styleOverrides: { root: { borderRadius: 16 } } },
-        MuiButton: { styleOverrides: { root: { borderRadius: 10, fontWeight: 600, fontSize: '1rem', fontFamily: "'Sarabun', sans-serif" } } },
-        MuiTextField: { defaultProps: { size: 'small' } },
-      },
-    });
+  <!-- ══ TAB 0: FORM ══ -->
+  <div id="tab0">
 
-    // ─── Constants ───────────────────────────────────────────────────────────────
-    const CHRONIC_DISEASES = [
-      { value: 'none',       label: 'ไม่มีโรคประจำตัว' },
-      { value: 'diabetes',   label: 'โรคเบาหวาน' },
-      { value: 'hypertension', label: 'โรคความดันโลหิตสูง' },
-      { value: 'heart',      label: 'โรคหัวใจ' },
-      { value: 'kidney',     label: 'โรคไต' },
-      { value: 'cancer',     label: 'โรคมะเร็ง' },
-      { value: 'other',      label: 'โรคอื่น ๆ' },
-    ];
+    <!-- Alert -->
+    <div class="alert alert-error hidden" id="mainAlert">
+      <span class="material-icons">error</span>
+      <div>
+        <div class="alert-title">ข้อมูลไม่ครบถ้วน</div>
+        <div id="alertText"></div>
+      </div>
+      <button class="alert-close" onclick="closeAlert()">✕</button>
+    </div>
 
-    // ─── Risk Logic ──────────────────────────────────────────────────────────────
-    function calculateBMI(weight, height) {
-      const h = height / 100;
-      return weight / (h * h);
+    <!-- Section 1: ข้อมูลส่วนบุคคล -->
+    <div class="paper">
+      <div class="section-header">
+        <div class="section-icon-box" style="background:#e3f2fd">
+          <span class="material-icons" style="color:var(--primary)">person</span>
+        </div>
+        <span class="section-title" style="color:var(--primary)">ข้อมูลส่วนบุคคล</span>
+      </div>
+      <hr class="divider" />
+
+      <div class="grid grid-2" style="margin-bottom:16px">
+        <!-- ชื่อ -->
+        <div class="field" id="f-firstName">
+          <label>ชื่อ <span class="req">*</span></label>
+          <input type="text" id="firstName" placeholder="กรอกชื่อ" oninput="clearErr('firstName')" />
+          <span class="field-hint err" id="err-firstName"></span>
+        </div>
+        <!-- นามสกุล -->
+        <div class="field" id="f-lastName">
+          <label>นามสกุล <span class="req">*</span></label>
+          <input type="text" id="lastName" placeholder="กรอกนามสกุล" oninput="clearErr('lastName')" />
+          <span class="field-hint err" id="err-lastName"></span>
+        </div>
+      </div>
+
+      <div class="grid grid-3">
+        <!-- อายุ -->
+        <div class="field" id="f-age">
+          <label>อายุ (ปี) <span class="req">*</span></label>
+          <input type="number" id="age" placeholder="เช่น 35" min="1" max="120" oninput="clearErr('age'); updateBMI(); checkAge()" />
+          <span class="field-hint" id="err-age"></span>
+        </div>
+        <!-- น้ำหนัก -->
+        <div class="field" id="f-weight">
+          <label>น้ำหนัก (กก.) <span class="req">*</span></label>
+          <input type="number" id="weight" placeholder="เช่น 65" min="10" max="300" step="0.1" oninput="clearErr('weight'); updateBMI()" />
+          <span class="field-hint err" id="err-weight"></span>
+        </div>
+        <!-- ส่วนสูง -->
+        <div class="field" id="f-height">
+          <label>ส่วนสูง (ซม.) <span class="req">*</span></label>
+          <input type="number" id="height" placeholder="เช่น 165" min="50" max="250" oninput="clearErr('height'); updateBMI()" />
+          <span class="field-hint err" id="err-height"></span>
+        </div>
+      </div>
+
+      <!-- BMI Preview -->
+      <div class="bmi-preview hidden" id="bmiPreview">
+        <div class="bmi-preview-top">
+          <span class="material-icons" id="bmiPreviewIcon" style="color:var(--success)">monitor_weight</span>
+          <span class="bmi-value" id="bmiPreviewVal" style="color:var(--success)">BMI: 0.00 กก./ม.²</span>
+          <span class="chip" id="bmiPreviewChip">-</span>
+        </div>
+        <div class="gauge-wrap">
+          <div class="gauge-labels">
+            <span>ต่ำกว่าเกณฑ์</span><span>ปกติ</span><span>เกินเกณฑ์</span><span>อ้วน</span>
+          </div>
+          <div class="gauge-track">
+            <div class="gauge-needle" id="gaugeNeedle" style="left:50%"></div>
+          </div>
+          <div class="gauge-nums">
+            <span>&lt;18.5</span><span>18.5</span><span>23</span><span>27.5</span><span>&gt;40</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: พฤติกรรมความเสี่ยง -->
+    <div class="paper">
+      <div class="section-header">
+        <div class="section-icon-box" style="background:#fff3e0">
+          <span class="material-icons" style="color:var(--warning)">warning</span>
+        </div>
+        <span class="section-title" style="color:var(--warning)">พฤติกรรมความเสี่ยงและโรคประจำตัว</span>
+      </div>
+      <hr class="divider" />
+
+      <div class="grid-row-2">
+        <!-- RadioGroup: สูบบุหรี่ -->
+        <div>
+          <div class="radio-group-label">🚬 พฤติกรรมการสูบบุหรี่</div>
+          <label class="radio-option never-opt">
+            <input type="radio" name="smoking" value="never" checked onchange="updateChips()" />
+            <span>✅ ไม่เคยสูบบุหรี่</span>
+          </label>
+          <label class="radio-option former-opt">
+            <input type="radio" name="smoking" value="former" onchange="updateChips()" />
+            <span>⚠️ เคยสูบแต่เลิกแล้ว</span>
+          </label>
+          <label class="radio-option curr-opt">
+            <input type="radio" name="smoking" value="current" onchange="updateChips()" />
+            <span>🚨 สูบบุหรี่อยู่ในปัจจุบัน</span>
+          </label>
+        </div>
+
+        <!-- Select: โรคประจำตัว -->
+        <div>
+          <div class="field">
+            <label>💊 โรคประจำตัว</label>
+            <select id="disease" onchange="updateChips()">
+              <option value="none">ไม่มีโรคประจำตัว</option>
+              <option value="diabetes">⚠️ โรคเบาหวาน</option>
+              <option value="hypertension">⚠️ โรคความดันโลหิตสูง</option>
+              <option value="heart">⚠️ โรคหัวใจ</option>
+              <option value="kidney">⚠️ โรคไต</option>
+              <option value="cancer">⚠️ โรคมะเร็ง</option>
+              <option value="other">⚠️ โรคอื่น ๆ</option>
+            </select>
+          </div>
+
+          <!-- Chips สถานะ -->
+          <div class="chip-row" id="statusChips">
+            <span class="chip chip-success" id="chipSmoking">✅ ไม่สูบบุหรี่</span>
+            <span class="chip chip-success" id="chipDisease">✅ ไม่มีโรคประจำตัว</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-actions no-print">
+      <button class="btn btn-primary" onclick="handleSubmit()">
+        <span class="material-icons">assessment</span> ประเมินผลสุขภาพ
+      </button>
+      <button class="btn btn-outline" onclick="handleReset()">
+        <span class="material-icons">refresh</span> ล้างข้อมูล
+      </button>
+    </div>
+
+    <!-- Alert Info -->
+    <div class="alert alert-info" style="margin-top:20px">
+      <span class="material-icons">info</span>
+      <div>
+        <strong>หมายเหตุ:</strong> การประเมินนี้เป็นเพียงการคัดกรองเบื้องต้นเท่านั้น
+        ไม่สามารถทดแทนการวินิจฉัยของแพทย์ได้ กรุณาพบแพทย์เพื่อรับการตรวจอย่างละเอียด
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 1: HISTORY ══ -->
+  <div id="tab1" style="display:none">
+    <div class="paper">
+      <div class="section-header">
+        <div class="section-icon-box" style="background:#ede7f6">
+          <span class="material-icons" style="color:var(--secondary)">history</span>
+        </div>
+        <span class="section-title" style="color:var(--secondary)">ประวัติการประเมิน</span>
+        <span class="chip chip-primary" id="histCountChip">0 รายการ</span>
+      </div>
+      <hr class="divider" />
+      <div id="historyContent"></div>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:32px; color:var(--text-secondary); font-size:0.78rem;">
+    © 2026 ระบบประเมินความเสี่ยงสุขภาพเบื้องต้น · Patient Health Risk Assessment System
+  </div>
+</div>
+
+<!-- ── Dialog (Modal) ── -->
+<div class="dialog-overlay" id="resultDialog">
+  <div class="dialog">
+    <div class="dialog-header" id="dialogHeader">
+      <span class="material-icons" style="font-size:36px" id="dialogIcon">check_circle</span>
+      <div class="dialog-header-text">
+        <h2>สรุปผลการประเมินสุขภาพ</h2>
+        <p>Health Risk Assessment Report</p>
+      </div>
+      <button class="dialog-close no-print" onclick="closeDialog()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="dialog-body" id="dialogBody"></div>
+    <div class="dialog-actions no-print" id="dialogActions"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   DATA & CONFIG
+══════════════════════════════════════════ */
+const DISEASES = [
+  { value:'none',         label:'ไม่มีโรคประจำตัว',     score:0 },
+  { value:'diabetes',     label:'โรคเบาหวาน',            score:2 },
+  { value:'hypertension', label:'โรคความดันโลหิตสูง',    score:2 },
+  { value:'heart',        label:'โรคหัวใจ',              score:3 },
+  { value:'kidney',       label:'โรคไต',                 score:2 },
+  { value:'cancer',       label:'โรคมะเร็ง',             score:3 },
+  { value:'other',        label:'โรคอื่น ๆ',             score:1 },
+];
+
+const BMI_CATS = [
+  { max:18.5,     label:'น้ำหนักต่ำกว่าเกณฑ์', color:'chip-info',    hex:'#0288d1', bg:'#e1f5fe' },
+  { max:23,       label:'น้ำหนักปกติ',           color:'chip-success', hex:'#2e7d32', bg:'#e8f5e9' },
+  { max:27.5,     label:'น้ำหนักเกิน',           color:'chip-warning', hex:'#e65100', bg:'#fff3e0' },
+  { max:Infinity, label:'อ้วน',                  color:'chip-error',   hex:'#c62828', bg:'#ffebee' },
+];
+
+const RISK_CFG = {
+  low:      { label:'ความเสี่ยงต่ำ',      hex:'#2e7d32', bg:'#e8f5e9', chip:'chip-filled-success', icon:'check_circle' },
+  moderate: { label:'ความเสี่ยงปานกลาง', hex:'#e65100', bg:'#fff3e0', chip:'chip-filled-warning', icon:'warning'       },
+  high:     { label:'ความเสี่ยงสูง',      hex:'#c62828', bg:'#ffebee', chip:'chip-filled-error',   icon:'dangerous'     },
+};
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+const $  = id => document.getElementById(id);
+const v  = id => ($(id).value || '').trim();
+const nv = id => Number($(id).value);
+
+function getBMICat(bmi) { return BMI_CATS.find(c => bmi < c.max); }
+function calcBMI(w, h) { return w / Math.pow(h / 100, 2); }
+function bmiToPercent(bmi) { return ((Math.min(Math.max(bmi,10),40)-10)/30)*100; }
+
+function assessRisk(bmi, smoking, disease, age) {
+  let s = bmi<18.5?1 : bmi<23?0 : bmi<27.5?2 : 3;
+  s += smoking==='current'?3 : smoking==='former'?1 : 0;
+  s += (DISEASES.find(d=>d.value===disease)?.score ?? 0);
+  if (Number(age)>=60) s+=1;
+  return s<=1?'low' : s<=5?'moderate' : 'high';
+}
+
+function getRecs(level, bmi, smoking, disease) {
+  const base = {
+    low:      ['✅ ออกกำลังกายอย่างน้อย 150 นาที/สัปดาห์','✅ รับประทานอาหารครบ 5 หมู่','✅ ตรวจสุขภาพประจำปีอย่างน้อยปีละครั้ง','✅ นอนหลับ 7–9 ชั่วโมง/คืน'],
+    moderate: ['⚠️ พบแพทย์เพื่อตรวจเพิ่มเติมภายใน 1–3 เดือน','⚠️ ลดอาหารไขมันสูงและน้ำตาล','⚠️ วัดความดันโลหิตทุกเดือน','⚠️ เพิ่มการออกกำลังกายให้สม่ำเสมอ'],
+    high:     ['🚨 พบแพทย์ผู้เชี่ยวชาญโดยด่วนภายใน 1–2 สัปดาห์','🚨 ตรวจเลือดและร่างกายอย่างละเอียด','🚨 ติดตามอาการอย่างใกล้ชิดทุกวัน','🚨 งดสูบบุหรี่และเครื่องดื่มแอลกอฮอล์ทันที'],
+  };
+  const r = [...base[level]];
+  if (smoking==='current') r.push('🚬 แนะนำเลิกสูบบุหรี่ โทร 1600 สายด่วนเลิกบุหรี่');
+  if (bmi>=27.5) r.push('⚖️ วางแผนลดน้ำหนักร่วมกับนักโภชนาการ เป้าหมาย BMI < 23');
+  if (bmi<18.5)  r.push('🍽️ ปรึกษานักโภชนาการเพื่อเพิ่มน้ำหนักให้เหมาะสม');
+  if (disease!=='none') r.push('💊 รับยาและติดตามโรคประจำตัวกับแพทย์อย่างสม่ำเสมอ');
+  return r;
+}
+
+function getDate() {
+  return new Date().toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let history = [];
+try { history = JSON.parse(localStorage.getItem('bmi_history')||'[]'); } catch {}
+updateHistoryBadge();
+
+/* ══════════════════════════════════════════
+   TABS
+══════════════════════════════════════════ */
+function switchTab(n) {
+  $('tab0').style.display = n===0?'block':'none';
+  $('tab1').style.display = n===1?'block':'none';
+  $('tab0btn').className = 'tab-btn'+(n===0?' active':'');
+  $('tab1btn').className = 'tab-btn'+(n===1?' active':'');
+  if (n===1) renderHistory();
+}
+
+/* ══════════════════════════════════════════
+   LIVE BMI PREVIEW
+══════════════════════════════════════════ */
+function updateBMI() {
+  const w = nv('weight'), h = nv('height');
+  const preview = $('bmiPreview');
+  if (w>0 && h>50 && w<300 && h<250) {
+    const bmi = calcBMI(w,h);
+    const cat = getBMICat(bmi);
+    preview.classList.remove('hidden');
+    preview.style.background = cat.bg;
+    preview.style.border = `1px solid ${cat.hex}44`;
+    $('bmiPreviewVal').textContent = `BMI: ${bmi.toFixed(2)} กก./ม.²`;
+    $('bmiPreviewVal').style.color = cat.hex;
+    $('bmiPreviewIcon').style.color = cat.hex;
+    const chip = $('bmiPreviewChip');
+    chip.textContent = cat.label;
+    chip.className = 'chip '+cat.color;
+    $('gaugeNeedle').style.left = bmiToPercent(bmi)+'%';
+  } else {
+    preview.classList.add('hidden');
+  }
+}
+
+function checkAge() {
+  const a = nv('age');
+  const hint = $('err-age');
+  if (a>=60 && a<=120) {
+    hint.textContent = '⚠️ ผู้สูงอายุ: ความเสี่ยงสูงขึ้น';
+    hint.className = 'field-hint warn';
+  } else if (!hint.classList.contains('err')){
+    hint.textContent = '';
+  }
+}
+
+/* ══════════════════════════════════════════
+   CHIPS UPDATE
+══════════════════════════════════════════ */
+function updateChips() {
+  const smoking = document.querySelector('input[name="smoking"]:checked')?.value||'never';
+  const disease = $('disease').value;
+  const cs = $('chipSmoking');
+  const cd = $('chipDisease');
+  cs.textContent = smoking==='never'?'✅ ไม่สูบบุหรี่':smoking==='former'?'⚠️ เลิกสูบแล้ว':'🚨 สูบบุหรี่อยู่';
+  cs.className   = 'chip '+(smoking==='never'?'chip-success':smoking==='former'?'chip-warning':'chip-error');
+  cd.textContent = DISEASES.find(d=>d.value===disease)?.label||'';
+  cd.className   = 'chip '+(disease==='none'?'chip-success':'chip-error');
+}
+
+/* ══════════════════════════════════════════
+   VALIDATION
+══════════════════════════════════════════ */
+function validate() {
+  const errs = {};
+  if (!v('firstName')) errs.firstName = 'กรุณากรอกชื่อ';
+  if (!v('lastName'))  errs.lastName  = 'กรุณากรอกนามสกุล';
+  const a=nv('age');   if (!a||a<1||a>120) errs.age    = 'กรุณากรอกอายุที่ถูกต้อง (1–120 ปี)';
+  const w=nv('weight');if (!w||w<10||w>300) errs.weight = 'กรุณากรอกน้ำหนักที่ถูกต้อง (10–300 กก.)';
+  const h=nv('height');if (!h||h<50||h>250) errs.height = 'กรุณากรอกส่วนสูงที่ถูกต้อง (50–250 ซม.)';
+  return errs;
+}
+
+function showErrors(errs) {
+  ['firstName','lastName','age','weight','height'].forEach(f => {
+    const fEl = $('f-'+f), eEl = $('err-'+f);
+    if (errs[f]) {
+      fEl.classList.add('error');
+      eEl.textContent = errs[f];
+      eEl.className = 'field-hint err';
     }
+  });
+}
 
-    function getBMICategory(bmi) {
-      if (bmi < 18.5) return { label: 'น้ำหนักต่ำกว่าเกณฑ์', color: 'info' };
-      if (bmi < 23)   return { label: 'น้ำหนักปกติ',           color: 'success' };
-      if (bmi < 27.5) return { label: 'น้ำหนักเกิน',           color: 'warning' };
-      return                 { label: 'อ้วน',                   color: 'error' };
-    }
+function clearErr(field) {
+  $('f-'+field)?.classList.remove('error');
+  const e = $('err-'+field);
+  if (e && e.className.includes('err')) e.textContent = '';
+}
 
-    function assessRisk(bmi, smoking, disease) {
-      let score = 0;
+function closeAlert() { $('mainAlert').classList.add('hidden'); }
 
-      // BMI score
-      if (bmi < 18.5)       score += 1;
-      else if (bmi < 23)    score += 0;
-      else if (bmi < 27.5)  score += 2;
-      else                  score += 3;
+/* ══════════════════════════════════════════
+   SUBMIT
+══════════════════════════════════════════ */
+function handleSubmit() {
+  const errs = validate();
+  if (Object.keys(errs).length) {
+    showErrors(errs);
+    $('mainAlert').classList.remove('hidden');
+    $('alertText').textContent = 'กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง';
+    $('mainAlert').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  closeAlert();
+  const w=nv('weight'), h=nv('height'), a=nv('age');
+  const smoking = document.querySelector('input[name="smoking"]:checked')?.value||'never';
+  const disease = $('disease').value;
+  const bmi   = calcBMI(w,h);
+  const level = assessRisk(bmi, smoking, disease, a);
+  const recs  = getRecs(level, bmi, smoking, disease);
+  const date  = getDate();
+  const rec   = { firstName:v('firstName'), lastName:v('lastName'), age:a, weight:w, height:h, smoking, disease, bmi, riskLevel:level, recs, date };
+  saveHistory(rec);
+  openDialog(rec);
+}
 
-      // Smoking score
-      if (smoking === 'current') score += 3;
-      else if (smoking === 'former') score += 1;
+/* ══════════════════════════════════════════
+   RESET
+══════════════════════════════════════════ */
+function handleReset() {
+  ['firstName','lastName','age','weight','height'].forEach(id => {
+    $(id).value = '';
+    clearErr(id);
+  });
+  document.querySelector('input[name="smoking"][value="never"]').checked = true;
+  $('disease').value = 'none';
+  closeAlert();
+  updateBMI();
+  updateChips();
+}
 
-      // Disease score
-      if (disease !== 'none') score += 2;
-      if (disease === 'heart' || disease === 'cancer') score += 1;
+/* ══════════════════════════════════════════
+   DIALOG
+══════════════════════════════════════════ */
+function openDialog(rec) {
+  const cfg    = RISK_CFG[rec.riskLevel];
+  const bmiCat = getBMICat(rec.bmi);
+  const smokingLabel = rec.smoking==='never'?'ไม่เคยสูบ':rec.smoking==='former'?'เลิกสูบแล้ว':'สูบบุหรี่อยู่';
+  const diseaseLabel = DISEASES.find(d=>d.value===rec.disease)?.label||'';
 
-      if (score <= 1)       return { level: 'low',      label: 'ความเสี่ยงต่ำ',      color: 'success', chipColor: '#2e7d32', bgColor: '#e8f5e9' };
-      if (score <= 4)       return { level: 'moderate', label: 'ความเสี่ยงปานกลาง', color: 'warning', chipColor: '#f57c00', bgColor: '#fff3e0' };
-      return                       { level: 'high',     label: 'ความเสี่ยงสูง',      color: 'error',   chipColor: '#c62828', bgColor: '#ffebee' };
-    }
+  // Header
+  $('dialogHeader').style.background = `linear-gradient(135deg,${cfg.hex}dd,${cfg.hex})`;
+  $('dialogIcon').textContent = cfg.icon;
 
-    function getRecommendations(riskLevel, bmi, smoking, disease) {
-      const recs = [];
-      if (riskLevel === 'low') {
-        recs.push('✅ รักษาสุขภาพที่ดีด้วยการออกกำลังกายสม่ำเสมอ');
-        recs.push('✅ รับประทานอาหารที่มีประโยชน์และครบหมู่');
-        recs.push('✅ ตรวจสุขภาพประจำปีอย่างน้อยปีละครั้ง');
-      } else if (riskLevel === 'moderate') {
-        recs.push('⚠️ ควรพบแพทย์เพื่อรับการตรวจสุขภาพเพิ่มเติม');
-        recs.push('⚠️ ปรับพฤติกรรมการรับประทานอาหารและออกกำลังกาย');
-        if (smoking === 'current') recs.push('⚠️ แนะนำให้เลิกสูบบุหรี่ทันที');
-        if (disease !== 'none') recs.push('⚠️ ติดตามอาการโรคประจำตัวอย่างสม่ำเสมอ');
-      } else {
-        recs.push('🚨 ต้องการการรักษาและติดตามจากแพทย์ผู้เชี่ยวชาญโดยด่วน');
-        recs.push('🚨 งดสูบบุหรี่และหลีกเลี่ยงสิ่งที่เพิ่มความเสี่ยง');
-        recs.push('🚨 ตรวจสุขภาพและวัดความดันโลหิตทุกเดือน');
-        if (bmi >= 27.5) recs.push('🚨 วางแผนลดน้ำหนักร่วมกับนักโภชนาการ');
-      }
-      return recs;
-    }
+  // Body
+  $('dialogBody').innerHTML = `
+    <!-- Patient card -->
+    <div class="info-card">
+      <div class="info-card-header">
+        <span class="material-icons" style="color:var(--primary)">account_circle</span>
+        <span style="color:var(--primary)">ข้อมูลผู้รับการประเมิน</span>
+      </div>
+      <div class="info-grid">
+        <div class="info-cell"><div class="label">ชื่อ-นามสกุล</div><div class="val">${rec.firstName} ${rec.lastName}</div></div>
+        <div class="info-cell"><div class="label">อายุ</div><div class="val">${rec.age} ปี</div></div>
+        <div class="info-cell"><div class="label">น้ำหนัก</div><div class="val">${rec.weight} กก.</div></div>
+        <div class="info-cell"><div class="label">ส่วนสูง</div><div class="val">${rec.height} ซม.</div></div>
+        <div class="info-cell"><div class="label">พฤติกรรมสูบบุหรี่</div><div class="val">${smokingLabel}</div></div>
+        <div class="info-cell"><div class="label">โรคประจำตัว</div><div class="val">${diseaseLabel}</div></div>
+      </div>
+    </div>
 
-    // ─── Validation ──────────────────────────────────────────────────────────────
-    function validate(form) {
-      const errors = {};
-      if (!form.firstName.trim()) errors.firstName = 'กรุณากรอกชื่อ';
-      if (!form.lastName.trim())  errors.lastName  = 'กรุณากรอกนามสกุล';
-      const age = Number(form.age);
-      if (!form.age || isNaN(age) || age < 1 || age > 120)
-        errors.age = 'กรุณากรอกอายุที่ถูกต้อง (1–120 ปี)';
-      const weight = Number(form.weight);
-      if (!form.weight || isNaN(weight) || weight < 10 || weight > 300)
-        errors.weight = 'กรุณากรอกน้ำหนักที่ถูกต้อง (10–300 กก.)';
-      const height = Number(form.height);
-      if (!form.height || isNaN(height) || height < 50 || height > 250)
-        errors.height = 'กรุณากรอกส่วนสูงที่ถูกต้อง (50–250 ซม.)';
-      return errors;
-    }
+    <!-- BMI card -->
+    <div class="info-card" style="background:${bmiCat.bg}">
+      <div class="info-card-header">
+        <span class="material-icons" style="color:${bmiCat.hex}">monitor_weight</span>
+        ค่าดัชนีมวลกาย (BMI)
+      </div>
+      <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px">
+        <span style="font-size:2.2rem;font-weight:900;color:${bmiCat.hex}">${rec.bmi.toFixed(2)}</span>
+        <span class="chip ${bmiCat.color}">${bmiCat.label}</span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:12px">
+        สูตร: BMI = ${rec.weight} ÷ (${rec.height}/100)² = ${rec.bmi.toFixed(2)} กก./ม.²
+      </div>
+      <div class="gauge-wrap">
+        <div class="gauge-labels"><span>ต่ำกว่าเกณฑ์</span><span>ปกติ</span><span>เกินเกณฑ์</span><span>อ้วน</span></div>
+        <div class="gauge-track">
+          <div class="gauge-needle" style="left:${bmiToPercent(rec.bmi)}%"></div>
+        </div>
+        <div class="gauge-nums"><span>&lt;18.5</span><span>18.5</span><span>23</span><span>27.5</span><span>&gt;40</span></div>
+      </div>
+    </div>
 
-    // ─── Main App ────────────────────────────────────────────────────────────────
-    function App() {
-      const [form, setForm] = React.useState({
-        firstName: '', lastName: '', age: '',
-        weight: '', height: '',
-        smoking: 'never',
-        disease: 'none',
-      });
-      const [errors, setErrors]       = React.useState({});
-      const [result, setResult]       = React.useState(null);
-      const [dialogOpen, setDialogOpen] = React.useState(false);
-      const [alertMsg, setAlertMsg]   = React.useState(null);
+    <!-- Risk box -->
+    <div class="risk-box" style="background:${cfg.bg};border-color:${cfg.hex}44">
+      <div class="risk-box-row">
+        <span class="chip ${cfg.chip}">
+          <span class="material-icons" style="font-size:18px">${cfg.icon}</span>
+          ${cfg.label}
+        </span>
+        <div>
+          <div style="font-weight:600">
+            ${rec.riskLevel==='low'?'สุขภาพอยู่ในเกณฑ์ดี':rec.riskLevel==='moderate'?'ควรดูแลสุขภาพเพิ่มเติม':'จำเป็นต้องพบแพทย์โดยด่วน'}
+          </div>
+          <div style="font-size:0.78rem;color:var(--text-secondary)">วันที่ประเมิน: ${rec.date}</div>
+        </div>
+      </div>
+    </div>
 
-      const handleChange = (field) => (e) => {
-        setForm(prev => ({ ...prev, [field]: e.target.value }));
-        if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
-      };
+    <!-- Recommendations -->
+    <div style="font-weight:700;margin-bottom:10px">
+      <span class="material-icons" style="color:#f9a825;vertical-align:middle;margin-right:4px">lightbulb</span>
+      คำแนะนำสำหรับคุณ
+    </div>
+    ${rec.recs.map(r=>`<div class="rec-item" style="border-color:${cfg.hex}">${r}</div>`).join('')}
+  `;
 
-      const handleSubmit = () => {
-        const errs = validate(form);
-        if (Object.keys(errs).length > 0) {
-          setErrors(errs);
-          setAlertMsg({ severity: 'error', text: 'กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง' });
-          return;
-        }
-        const bmi      = calculateBMI(Number(form.weight), Number(form.height));
-        const bmiCat   = getBMICategory(bmi);
-        const risk     = assessRisk(bmi, form.smoking, form.disease);
-        const recs     = getRecommendations(risk.level, bmi, form.smoking, form.disease);
-        setResult({ bmi, bmiCat, risk, recs });
-        setAlertMsg(null);
-        setDialogOpen(true);
-      };
+  // Actions
+  $('dialogActions').innerHTML = `
+    <button class="btn btn-outline btn-sm" onclick="window.print()">
+      <span class="material-icons" style="font-size:18px">print</span> พิมพ์ผล
+    </button>
+    <button class="btn btn-outline btn-sm" onclick="closeDialog();handleReset()">
+      <span class="material-icons" style="font-size:18px">refresh</span> ประเมินใหม่
+    </button>
+    <button class="btn btn-sm" style="background:${cfg.hex};color:#fff" onclick="closeDialog()">ปิด</button>
+  `;
 
-      const handleReset = () => {
-        setForm({ firstName:'', lastName:'', age:'', weight:'', height:'', smoking:'never', disease:'none' });
-        setErrors({});
-        setResult(null);
-        setAlertMsg(null);
-      };
+  $('resultDialog').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
 
-      const bmiPreview = (form.weight && form.height && !isNaN(Number(form.weight)) && !isNaN(Number(form.height)) && Number(form.height) > 0)
-        ? calculateBMI(Number(form.weight), Number(form.height))
-        : null;
+function closeDialog() {
+  $('resultDialog').classList.remove('open');
+  document.body.style.overflow = '';
+}
 
-      return (
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
+$('resultDialog').addEventListener('click', e => { if(e.target===$('resultDialog')) closeDialog(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeDialog(); });
 
-          {/* AppBar */}
-          <AppBar position="static" elevation={0}
-            sx={{ background: 'linear-gradient(90deg,#1565c0,#7b1fa2)', py: 0.5 }}>
-            <Toolbar>
-              <Icons.LocalHospital sx={{ mr: 1.5, fontSize: 32 }} />
-              <Box>
-                <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1.2 }}>
-                  ระบบลงทะเบียนและประเมินความเสี่ยงสุขภาพเบื้องต้น
-                </Typography>
-                <Typography variant="caption" sx={{ opacity: 0.85 }}>
-                  Patient Health Risk Assessment and Registration System
-                </Typography>
-              </Box>
-            </Toolbar>
-          </AppBar>
+/* ══════════════════════════════════════════
+   HISTORY
+══════════════════════════════════════════ */
+function saveHistory(rec) {
+  history = [rec, ...history].slice(0,20);
+  try { localStorage.setItem('bmi_history', JSON.stringify(history)); } catch {}
+  updateHistoryBadge();
+}
 
-          <Container maxWidth="md" sx={{ py: 4 }}>
+function updateHistoryBadge() {
+  $('histBadge').textContent = history.length;
+  $('histBadge').style.display = history.length>0?'inline-flex':'none';
+  $('tabHistLabel').textContent = `ประวัติ (${history.length} รายการ)`;
+  const c = $('histCountChip');
+  if(c) c.textContent = history.length+' รายการ';
+}
 
-            {/* Alert banner */}
-            {alertMsg && (
-              <Alert severity={alertMsg.severity} onClose={() => setAlertMsg(null)} sx={{ mb: 2, borderRadius: 3 }}>
-                <AlertTitle>{alertMsg.severity === 'error' ? 'ข้อมูลไม่ครบถ้วน' : 'สำเร็จ'}</AlertTitle>
-                {alertMsg.text}
-              </Alert>
-            )}
+function renderHistory() {
+  const c = $('histCountChip');
+  if(c) c.textContent = history.length+' รายการ';
 
-            {/* ── Section 1: ข้อมูลส่วนบุคคล ── */}
-            <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-              <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-                <Icons.Person color="primary" />
-                <Typography variant="h6" fontWeight={700} color="primary">
-                  ข้อมูลส่วนบุคคล
-                </Typography>
-              </Stack>
-              <Divider sx={{ mb: 2 }} />
+  if (!history.length) {
+    $('historyContent').innerHTML = `
+      <div class="table-empty">
+        <span class="material-icons">history</span>
+        ยังไม่มีประวัติการประเมิน
+      </div>`;
+    return;
+  }
 
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="ชื่อ *" value={form.firstName}
-                    onChange={handleChange('firstName')}
-                    error={!!errors.firstName} helperText={errors.firstName}
-                    InputProps={{ startAdornment: <Icons.Badge sx={{ mr:1, color:'text.secondary' }} /> }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="นามสกุล *" value={form.lastName}
-                    onChange={handleChange('lastName')}
-                    error={!!errors.lastName} helperText={errors.lastName}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField fullWidth label="อายุ (ปี) *" type="number" value={form.age}
-                    onChange={handleChange('age')}
-                    error={!!errors.age} helperText={errors.age}
-                    inputProps={{ min: 1, max: 120 }}
-                    InputProps={{ startAdornment: <Icons.Cake sx={{ mr:1, color:'text.secondary' }} /> }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField fullWidth label="น้ำหนัก (กก.) *" type="number" value={form.weight}
-                    onChange={handleChange('weight')}
-                    error={!!errors.weight} helperText={errors.weight}
-                    inputProps={{ min: 10, max: 300, step: 0.1 }}
-                    InputProps={{ startAdornment: <Icons.Scale sx={{ mr:1, color:'text.secondary' }} /> }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField fullWidth label="ส่วนสูง (ซม.) *" type="number" value={form.height}
-                    onChange={handleChange('height')}
-                    error={!!errors.height} helperText={errors.height}
-                    inputProps={{ min: 50, max: 250 }}
-                    InputProps={{ startAdornment: <Icons.Height sx={{ mr:1, color:'text.secondary' }} /> }}
-                  />
-                </Grid>
-              </Grid>
+  const rows = history.map((rec,i) => {
+    const cfg = RISK_CFG[rec.riskLevel];
+    const cat = getBMICat(rec.bmi);
+    return `
+      <tr>
+        <td>${history.length-i}</td>
+        <td>${rec.firstName} ${rec.lastName}</td>
+        <td><span class="chip ${cat.color}" style="font-size:0.8rem">${rec.bmi.toFixed(1)}</span></td>
+        <td><span class="chip" style="background:${cfg.hex};color:#fff;border-color:${cfg.hex}">${cfg.label}</span></td>
+        <td style="font-size:0.78rem;color:var(--text-secondary)">${rec.date}</td>
+        <td>
+          <button class="btn-icon" onclick="openDialog(historyRecAt(${i}))" title="ดูผล">
+            <span class="material-icons" style="font-size:20px">visibility</span>
+          </button>
+        </td>
+      </tr>`;
+  }).join('');
 
-              {/* BMI Preview */}
-              {bmiPreview && bmiPreview > 0 && bmiPreview < 100 && (
-                <Box mt={2} p={1.5} borderRadius={3} bgcolor="#f3f4f6"
-                  display="flex" alignItems="center" gap={2} flexWrap="wrap">
-                  <Typography variant="body2" color="text.secondary">
-                    ค่า BMI เบื้องต้น:
-                  </Typography>
-                  <Chip label={`BMI = ${bmiPreview.toFixed(2)}`}
-                    color={getBMICategory(bmiPreview).color}
-                    icon={<Icons.MonitorWeight />} size="small" />
-                  <Chip label={getBMICategory(bmiPreview).label}
-                    color={getBMICategory(bmiPreview).color} variant="outlined" size="small" />
-                </Box>
-              )}
-            </Paper>
+  $('historyContent').innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>ชื่อ-นามสกุล</th><th>BMI</th>
+            <th>ระดับความเสี่ยง</th><th>วันที่</th><th>ดูผล</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px">
+      <button class="btn btn-danger btn-sm" onclick="clearHistory()">
+        <span class="material-icons" style="font-size:18px">delete_sweep</span> ล้างประวัติทั้งหมด
+      </button>
+    </div>`;
+}
 
-            {/* ── Section 2: พฤติกรรมความเสี่ยง ── */}
-            <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-              <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-                <Icons.Warning color="warning" />
-                <Typography variant="h6" fontWeight={700} color="warning.dark">
-                  พฤติกรรมความเสี่ยงและโรคประจำตัว
-                </Typography>
-              </Stack>
-              <Divider sx={{ mb: 2 }} />
+function historyRecAt(i) { return history[i]; }
 
-              <Grid container spacing={3}>
-                {/* Smoking – RadioGroup */}
-                <Grid item xs={12} sm={6}>
-                  <FormControl component="fieldset">
-                    <FormLabel component="legend" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
-                      พฤติกรรมการสูบบุหรี่
-                    </FormLabel>
-                    <RadioGroup value={form.smoking} onChange={handleChange('smoking')}>
-                      <FormControlLabel value="never"   control={<Radio color="success" />} label="ไม่เคยสูบบุหรี่" />
-                      <FormControlLabel value="former"  control={<Radio color="warning" />} label="เคยสูบแต่เลิกแล้ว" />
-                      <FormControlLabel value="current" control={<Radio color="error"   />} label="สูบบุหรี่อยู่ในปัจจุบัน" />
-                    </RadioGroup>
-                  </FormControl>
-                </Grid>
+function clearHistory() {
+  if (confirm('ต้องการล้างประวัติทั้งหมดหรือไม่?')) {
+    history = [];
+    try { localStorage.removeItem('bmi_history'); } catch {}
+    updateHistoryBadge();
+    renderHistory();
+  }
+}
 
-                {/* Disease – Select */}
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <FormLabel sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
-                      โรคประจำตัว
-                    </FormLabel>
-                    <Select value={form.disease} onChange={handleChange('disease')} size="small">
-                      {CHRONIC_DISEASES.map(d => (
-                        <MenuItem key={d.value} value={d.value}>{d.label}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  {/* Risk indicator chips */}
-                  <Stack direction="row" spacing={1} mt={2} flexWrap="wrap" useFlexGap>
-                    <Chip size="small" icon={<Icons.SmokingRooms />}
-                      label={form.smoking === 'never' ? 'ไม่สูบบุหรี่' : form.smoking === 'former' ? 'เลิกสูบแล้ว' : 'สูบบุหรี่'}
-                      color={form.smoking === 'never' ? 'success' : form.smoking === 'former' ? 'warning' : 'error'}
-                      variant="outlined"
-                    />
-                    <Chip size="small" icon={<Icons.MedicalServices />}
-                      label={CHRONIC_DISEASES.find(d => d.value === form.disease)?.label}
-                      color={form.disease === 'none' ? 'success' : 'error'}
-                      variant="outlined"
-                    />
-                  </Stack>
-                </Grid>
-              </Grid>
-            </Paper>
-
-            {/* ── Action Buttons ── */}
-            <Stack direction="row" spacing={2} justifyContent="center">
-              <Button variant="contained" size="large"
-                startIcon={<Icons.Assessment />}
-                onClick={handleSubmit}
-                sx={{ px: 4, background: 'linear-gradient(90deg,#1565c0,#7b1fa2)',
-                  '&:hover': { background: 'linear-gradient(90deg,#0d47a1,#6a1b9a)' } }}>
-                ประเมินผล
-              </Button>
-              <Button variant="outlined" size="large"
-                startIcon={<Icons.Refresh />}
-                onClick={handleReset} color="inherit">
-                ล้างข้อมูล
-              </Button>
-            </Stack>
-
-            {/* ── Footer ── */}
-            <Box mt={5} textAlign="center">
-              <Typography variant="caption" color="text.secondary">
-                © 2026 ระบบประเมินความเสี่ยงสุขภาพเบื้องต้น · Patient Health Risk Assessment System
-              </Typography>
-            </Box>
-          </Container>
-
-          {/* ── Result Dialog ── */}
-          <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}
-            maxWidth="sm" fullWidth
-            PaperProps={{ sx: { borderRadius: 4, overflow: 'hidden' } }}>
-            {result && (
-              <>
-                <DialogTitle sx={{
-                  background: result.risk.level === 'low'
-                    ? 'linear-gradient(90deg,#2e7d32,#43a047)'
-                    : result.risk.level === 'moderate'
-                    ? 'linear-gradient(90deg,#e65100,#f57c00)'
-                    : 'linear-gradient(90deg,#b71c1c,#c62828)',
-                  color: '#fff', py: 2.5,
-                }}>
-                  <Stack direction="row" alignItems="center" spacing={1.5}>
-                    {result.risk.level === 'low'
-                      ? <Icons.CheckCircle sx={{ fontSize: 32 }} />
-                      : result.risk.level === 'moderate'
-                      ? <Icons.Warning sx={{ fontSize: 32 }} />
-                      : <Icons.Dangerous sx={{ fontSize: 32 }} />}
-                    <Box>
-                      <Typography variant="h6" fontWeight={700}>
-                        สรุปผลการประเมินสุขภาพ
-                      </Typography>
-                      <Typography variant="caption" sx={{ opacity: 0.9 }}>
-                        Health Risk Assessment Report
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </DialogTitle>
-
-                <DialogContent sx={{ pt: 3, pb: 1 }}>
-                  {/* Patient Info */}
-                  <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 3 }}>
-                    <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-                      <Icons.Person color="primary" fontSize="small" />
-                      <Typography fontWeight={700}>ข้อมูลผู้ป่วย</Typography>
-                    </Stack>
-                    <Grid container spacing={1}>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" color="text.secondary">ชื่อ-นามสกุล</Typography>
-                        <Typography fontWeight={600}>{form.firstName} {form.lastName}</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" color="text.secondary">อายุ</Typography>
-                        <Typography fontWeight={600}>{form.age} ปี</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" color="text.secondary">น้ำหนัก / ส่วนสูง</Typography>
-                        <Typography fontWeight={600}>{form.weight} กก. / {form.height} ซม.</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" color="text.secondary">โรคประจำตัว</Typography>
-                        <Typography fontWeight={600}>
-                          {CHRONIC_DISEASES.find(d => d.value === form.disease)?.label}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                  </Paper>
-
-                  {/* BMI Result */}
-                  <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 3, bgcolor: '#f9fafb' }}>
-                    <Stack direction="row" alignItems="center" spacing={1} mb={1.5}>
-                      <Icons.MonitorWeight color="primary" fontSize="small" />
-                      <Typography fontWeight={700}>ค่าดัชนีมวลกาย (BMI)</Typography>
-                    </Stack>
-                    <Stack direction="row" alignItems="center" spacing={2} mb={1}>
-                      <Typography variant="h4" fontWeight={800} color="primary">
-                        {result.bmi.toFixed(2)}
-                      </Typography>
-                      <Chip label={result.bmiCat.label} color={result.bmiCat.color} />
-                    </Stack>
-                    <Typography variant="caption" color="text.secondary">
-                      สูตร: BMI = น้ำหนัก (กก.) ÷ (ส่วนสูง (ม.))²
-                    </Typography>
-                    {/* BMI bar */}
-                    <Box mt={1.5}>
-                      <Box display="flex" justifyContent="space-between" mb={0.5}>
-                        {['&lt;18.5', '18.5–23', '23–27.5', '≥27.5'].map((r, i) => (
-                          <Typography key={i} variant="caption" color="text.secondary">{r}</Typography>
-                        ))}
-                      </Box>
-                      <Box height={8} borderRadius={4} overflow="hidden"
-                        sx={{ background: 'linear-gradient(90deg,#29b6f6 25%,#66bb6a 25% 50%,#ffa726 50% 75%,#ef5350 75%)' }}
-                      />
-                      <Box display="flex" justifyContent="space-between" mt={0.3}>
-                        {['ต่ำกว่าเกณฑ์','ปกติ','เกินเกณฑ์','อ้วน'].map((l,i) => (
-                          <Typography key={i} variant="caption" color="text.secondary" fontSize="0.6rem">{l}</Typography>
-                        ))}
-                      </Box>
-                    </Box>
-                  </Paper>
-
-                  {/* Risk Level */}
-                  <Box p={2} mb={2} borderRadius={3}
-                    sx={{ bgcolor: result.risk.bgColor, border: `2px solid ${result.risk.chipColor}` }}>
-                    <Stack direction="row" alignItems="center" spacing={2}>
-                      <Chip label={result.risk.label}
-                        sx={{ bgcolor: result.risk.chipColor, color: '#fff', fontWeight: 700, fontSize: '1rem', py: 2.5, px: 1 }}
-                        icon={
-                          result.risk.level === 'low'
-                            ? <Icons.CheckCircle style={{ color: '#fff' }} />
-                            : result.risk.level === 'moderate'
-                            ? <Icons.Warning style={{ color: '#fff' }} />
-                            : <Icons.Dangerous style={{ color: '#fff' }} />
-                        }
-                      />
-                      <Typography variant="body2">
-                        {result.risk.level === 'low'
-                          ? 'สุขภาพอยู่ในเกณฑ์ดี ควรรักษาพฤติกรรมที่ดีต่อไป'
-                          : result.risk.level === 'moderate'
-                          ? 'ควรปรับพฤติกรรมและพบแพทย์เพื่อตรวจเพิ่มเติม'
-                          : 'จำเป็นต้องได้รับการรักษาจากแพทย์ผู้เชี่ยวชาญโดยด่วน'}
-                      </Typography>
-                    </Stack>
-                  </Box>
-
-                  {/* Recommendations */}
-                  <Typography fontWeight={700} mb={1}>คำแนะนำ</Typography>
-                  <Stack spacing={0.75} mb={1}>
-                    {result.recs.map((r, i) => (
-                      <Typography key={i} variant="body2"
-                        sx={{ p: 1, borderRadius: 2, bgcolor: '#f5f5f5' }}>{r}</Typography>
-                    ))}
-                  </Stack>
-                </DialogContent>
-
-                <DialogActions sx={{ px: 3, py: 2 }}>
-                  <Button onClick={() => { setDialogOpen(false); handleReset(); }}
-                    variant="outlined" startIcon={<Icons.Refresh />}>
-                    ประเมินใหม่
-                  </Button>
-                  <Button onClick={() => window.print()} variant="contained"
-                    startIcon={<Icons.Print />}>
-                    พิมพ์ผล
-                  </Button>
-                  <Button onClick={() => setDialogOpen(false)} variant="contained" color="inherit">
-                    ปิด
-                  </Button>
-                </DialogActions>
-              </>
-            )}
-          </Dialog>
-        </ThemeProvider>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
+/* Init */
+updateChips();
+</script>
 </body>
 </html>
-
